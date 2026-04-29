@@ -1,0 +1,160 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Run full quality suite
+        run: pnpm run check
+        # = biome check + tsc --noEmit + vitest run --coverage + semgrep
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7
+
+  e2e:
+    name: E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Obligatoire seulement si la PR touche auth ou paiement
+    # Détection par convention : fichiers dans src/auth/** ou src/payment/**
+    if: |
+      contains(github.event.pull_request.labels.*.name, 'auth') ||
+      contains(github.event.pull_request.labels.*.name, 'payment')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Playwright tests
+        run: pnpm exec playwright test
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  security:
+    name: Security Scan (Snyk)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+          # Bloque si vulnérabilité High ou Critical
+
+  verify-conventions:
+    name: Verify Conventions
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check branch name convention
+        if: github.event_name == 'pull_request'
+        run: |
+          BRANCH="${{ github.head_ref }}"
+
+          # Mode proto : les branches exp/ NE DOIVENT JAMAIS ouvrir de PR.
+          # Le code de proto est jetable, partagé via lien direct dans Paperclip.
+          # Promotion en prod = nouveau ticket mode:prod + réécriture (pas de copier-coller).
+          if [[ "$BRANCH" =~ ^exp/ ]]; then
+            echo "❌ Les branches 'exp/' ne peuvent pas ouvrir de PR (mode proto)."
+            echo ""
+            echo "En mode proto, le code est jetable :"
+            echo "  - Push la branche, partage le lien compare dans le ticket Paperclip :"
+            echo "    https://github.com/<user>/<repo>/compare/main...$BRANCH"
+            echo "  - Pas de PR, pas de merge possible vers main."
+            echo ""
+            echo "Pour promouvoir en prod : ouvre un nouveau ticket avec label mode:prod"
+            echo "intitulé 'Hardening de <feature>' et réécris sous CHARTER-PROD.md."
+            exit 1
+          fi
+
+          # Mode prod : convention stricte
+          if [[ ! "$BRANCH" =~ ^(feat|fix|refactor|docs|test|chore)/ticket-[0-9]+-[a-z0-9-]+$ ]]; then
+            echo "❌ Nom de branche invalide : $BRANCH"
+            echo "Format attendu : type/ticket-<id>-<slug>"
+            echo "Exemples : feat/ticket-42-email-verification, fix/ticket-57-null-user"
+            exit 1
+          fi
+          echo "✅ Nom de branche valide : $BRANCH"
+
+      - name: Check PR title references Paperclip ticket
+        if: github.event_name == 'pull_request'
+        run: |
+          TITLE="${{ github.event.pull_request.title }}"
+          if [[ ! "$TITLE" =~ \[PC-[0-9]+\] ]]; then
+            echo "❌ Le titre de la PR doit contenir [PC-<id>]"
+            echo "Titre actuel : $TITLE"
+            exit 1
+          fi
+          echo "✅ Titre de PR valide"
