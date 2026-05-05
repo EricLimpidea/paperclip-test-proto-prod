@@ -11,7 +11,7 @@
 - **Nom du projet :** _(à renseigner)_
 - **Mission produit :** _(à renseigner — 1 phrase)_
 - **Date de bootstrap :** _(à renseigner)_
-- **Repo template utilisé :** `paperclip-project-template@<commit-sha>`
+- **Repo template utilisé :** `paperclip-template@<commit-sha>`
 
 ---
 
