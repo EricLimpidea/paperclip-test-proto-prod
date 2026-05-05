@@ -37,19 +37,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "tests/**/*.ts",
-    "tests/**/*.tsx",
-    "*.config.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "build",
-    ".next",
-    "coverage",
-    "playwright-report"
-  ]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "tests/**/*.tsx", "*.config.ts"],
+  "exclude": ["node_modules", "dist", "build", ".next", "coverage", "playwright-report"]
 }
