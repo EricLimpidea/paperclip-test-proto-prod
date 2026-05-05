@@ -9,8 +9,8 @@
 - [x] Fix the formatting-only `tsconfig.json` baseline defect.
 - [x] Fix the strict-typing Playwright baseline defect.
 - [x] Add only the missing test dependency and configure the Vitest baseline to tolerate the empty-template state without a permanent placeholder source file.
-- [ ] If another bootstrap-blocking defect is discovered, comment in this ticket before committing the fix, explaining the blocker and why it is absorbed into `LIMA-107`.
+- [x] If another bootstrap-blocking defect is discovered, comment in this ticket before committing the fix, explaining the blocker and why it is absorbed into `LIMA-107`.
 - [x] Re-run `pnpm run check` and capture any remaining baseline blocker discovered end to end.
-- [ ] Split the delivery into atomic commits by fix category: `tsconfig` formatting, Playwright strict typing, Vitest baseline (`jsdom` + empty-template handling), and any explicitly approved absorbed blocker.
-- [ ] Create or update the mirrored GitHub issue and open a PR titled `[PC-107] Stabilize template baseline for fresh bootstrap check`.
+- [x] Split the delivery into atomic commits by fix category: `tsconfig` formatting, Playwright strict typing, Vitest baseline (`jsdom` + empty-template handling), and any explicitly approved absorbed blocker.
+- [x] Create or update the mirrored GitHub issue and open a PR titled `[PC-107] Stabilize template baseline for fresh bootstrap check`.
 - [ ] Close the loop on `LIMA-105` and `LIMA-106` once the merge commit is known.
