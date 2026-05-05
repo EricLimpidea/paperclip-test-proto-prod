@@ -120,9 +120,9 @@ jobs:
 
       - name: Check branch name convention
         if: github.event_name == 'pull_request'
+        env:
+          BRANCH: ${{ github.head_ref }}
         run: |
-          BRANCH="${{ github.head_ref }}"
-
           # Mode proto : les branches exp/ NE DOIVENT JAMAIS ouvrir de PR.
           # Le code de proto est jetable, partagé via lien direct dans Paperclip.
           # Promotion en prod = nouveau ticket mode:prod + réécriture (pas de copier-coller).
@@ -150,8 +150,9 @@ jobs:
 
       - name: Check PR title references Paperclip ticket
         if: github.event_name == 'pull_request'
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
         run: |
-          TITLE="${{ github.event.pull_request.title }}"
           if [[ ! "$TITLE" =~ \[PC-[0-9]+\] ]]; then
             echo "❌ Le titre de la PR doit contenir [PC-<id>]"
             echo "Titre actuel : $TITLE"

@@ -14,7 +14,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
-    "security": "semgrep --config=auto --error",
+    "security": "bash ./scripts/run-semgrep.sh",
     "check:fast": "pnpm run lint && pnpm run typecheck",
     "check": "pnpm run lint && pnpm run typecheck && pnpm run test:coverage && pnpm run security"
   },
