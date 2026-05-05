@@ -51,7 +51,7 @@ _(à remplir si applicable)_
 
 _Format léger : date — décision — alternatives considérées — pourquoi celle-ci_
 
-### ADR-001 : Choix du repo template `paperclip-project-template`
+### ADR-001 : Choix du repo template `paperclip-template`
 - **Date :** _(date du bootstrap)_
 - **Décision :** projet bootstrappé depuis le template gouverné par le board
 - **Alternatives :** structure ad-hoc, ce qui aurait fragmenté la gouvernance
