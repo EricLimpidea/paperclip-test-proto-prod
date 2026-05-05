@@ -14,7 +14,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
-    "security": "semgrep --config=auto --error",
+    "security": "bash ./scripts/run-semgrep.sh",
     "check:fast": "pnpm run lint && pnpm run typecheck",
     "check": "pnpm run lint && pnpm run typecheck && pnpm run test:coverage && pnpm run security"
   },
@@ -27,7 +27,9 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.0",
     "@playwright/test": "^1.48.0",
+    "@types/node": "^20.19.39",
     "@vitest/coverage-v8": "^2.1.0",
+    "jsdom": "^29.1.1",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"
   }
