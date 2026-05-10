@@ -68,6 +68,20 @@ Exemple : `exp(onboarding): test wizard step ordering [PC-89]`
 
 Les branches `exp/` ne peuvent **PAS** ouvrir de PR. La CI rejette automatiquement toute PR dont la branche source commence par `exp/`. C'est volontaire et structurel.
 
+### Règle de push obligatoire
+
+Tout heartbeat productif se termine par un `git push` de la branche `exp/` sur GitHub.
+Le workspace Paperclip sur le VPS est un staging temporaire — il est volatile et
+inaccessible au board. Un travail non poussé sur GitHub est un travail inexistant
+pour le board.
+
+En début de chaque session proto, avant tout travail :
+```bash
+git fetch origin
+git reset --hard origin/main
+```
+pour synchroniser le workspace avec le dernier état de main.
+
 ### Comment partager ton travail avec le board
 
 Tu push ta branche, puis tu postes dans le ticket Paperclip un message au format :
